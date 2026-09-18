@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solar System Torchlight Hunt</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:Arial,Helvetica,sans-serif;background:#020617;color:white}
+#game{
+  position:relative;width:100vw;height:100vh;min-height:560px;overflow:hidden;
+  cursor:none;
+  background:
+    radial-gradient(circle at 12% 18%,#fff 0 1px,transparent 2px),
+    radial-gradient(circle at 25% 78%,#bfdbfe 0 1px,transparent 2px),
+    radial-gradient(circle at 42% 30%,#fff 0 1px,transparent 2px),
+    radial-gradient(circle at 58% 72%,#fff 0 1px,transparent 2px),
+    radial-gradient(circle at 77% 18%,#bfdbfe 0 1px,transparent 2px),
+    radial-gradient(circle at 91% 63%,#fff 0 1px,transparent 2px),
+    radial-gradient(circle at 67% 45%,#fff 0 1px,transparent 2px),
+    radial-gradient(circle at 15% 48%,#fff 0 1px,transparent 2px),
+    radial-gradient(ellipse at 50% 55%,rgba(30,64,175,.22),transparent 52%),
+    linear-gradient(135deg,#01030d,#071936 50%,#020617);
+  background-size:170px 160px,240px 190px,310px 260px,280px 230px,220px 190px,330px 280px,190px 170px,270px 230px,auto,auto;
+}
+.nebula{position:absolute;inset:-30%;pointer-events:none;background:radial-gradient(ellipse at 30% 55%,rgba(59,130,246,.13),transparent 25%),radial-gradient(ellipse at 75% 35%,rgba(139,92,246,.12),transparent 25%);filter:blur(30px)}
+#intro,#complete{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(1,5,18,.76);backdrop-filter:blur(5px)}
+.panel{width:min(760px,92vw);padding:30px;text-align:center;border:1px solid rgba(147,197,253,.35);border-radius:24px;background:rgba(7,24,55,.94);box-shadow:0 20px 80px #0008}
+h1{margin:0 0 12px;font-size:clamp(25px,4vw,42px);line-height:1.08}
+.sub{color:#cbd5e1;line-height:1.55}
+button{border:0;border-radius:999px;padding:13px 25px;margin-top:17px;background:#60a5fa;color:#061127;font-weight:800;font-size:15px;cursor:pointer}
+#hud{position:absolute;z-index:10;top:0;left:0;right:0;padding:13px 18px;display:flex;justify-content:space-between;align-items:center;pointer-events:none;background:linear-gradient(#020617dd,transparent)}
+.logo{font-weight:800;letter-spacing:.3px}
+.count{padding:8px 13px;border-radius:999px;background:#0f172acc;border:1px solid #94a3b855;font-weight:700}
+#instructions{position:absolute;z-index:9;bottom:15px;left:50%;transform:translateX(-50%);padding:8px 13px;border-radius:999px;background:#020617aa;border:1px solid #94a3b833;color:#cbd5e1;font-size:12px;white-space:nowrap;pointer-events:none}
+.fact{
+  position:absolute;z-index:2;width:clamp(170px,18vw,270px);padding:14px 16px;
+  border-radius:18px;border:1px solid rgba(147,197,253,.20);
+  background:rgba(10,25,54,.62);box-shadow:0 8px 30px #0005;
+  transform:translate(-50%,-50%);text-align:center;
+  transition:transform .2s, border-color .2s;
+}
+.fact .num{font-size:11px;color:#93c5fd;font-weight:800;letter-spacing:1.3px;margin-bottom:6px}
+.fact .words{font-size:14px;line-height:1.4;font-weight:700;color:#f8fafc}
+.fact.discovered{border-color:#60a5fa88;box-shadow:0 0 28px #60a5fa33}
+#darkness{
+  position:absolute;inset:0;z-index:5;pointer-events:none;background:rgba(0,0,0,.95);
+  -webkit-mask-image:radial-gradient(circle 105px at var(--x) var(--y),transparent 0,transparent 56%,rgba(0,0,0,.12) 72%,#000 100%);
+  mask-image:radial-gradient(circle 105px at var(--x) var(--y),transparent 0,transparent 56%,rgba(0,0,0,.12) 72%,#000 100%);
+}
+#torch{
+  position:absolute;z-index:8;pointer-events:none;width:210px;height:210px;margin:-105px 0 0 -105px;
+  left:var(--x);top:var(--y);border-radius:50%;border:1px solid rgba(255,255,220,.22);
+  box-shadow:0 0 45px 12px rgba(255,255,200,.17),inset 0 0 35px rgba(255,255,220,.08);
+}
+#torch:before{content:"";position:absolute;inset:17px;border-radius:50%;border:1px solid #fff2}
+#toast{position:absolute;z-index:12;left:50%;top:17%;transform:translate(-50%,-20px);opacity:0;pointer-events:none;padding:10px 18px;border-radius:999px;background:#172554ee;border:1px solid #60a5fa88;font-weight:800;transition:.3s}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:700px){
+ .fact{width:145px;padding:10px}.fact .words{font-size:11px}.fact .num{font-size:9px}
+ #instructions{font-size:10px}
+}
+</style>
+</head>
+<body>
+<div id="game">
+<div class="nebula"></div>
+
+<div id="intro">
+ <div class="panel">
+  <h1>🔦 Solar System Torchlight Hunt</h1>
+  <div class="sub"><b>10 Facts You Should Know About Our Solar System</b><br><br>
+  All 10 facts are hidden around this ONE page. Move your mouse or finger and explore different places with your torchlight. Find every fact!</div>
+  <button id="start">Start the Hunt 🚀</button>
+ </div>
+</div>
+
+<div id="complete">
+ <div class="panel">
+  <h1>🌌 All Facts Discovered!</h1>
+  <div class="sub">Great exploring! You found all 10 hidden Solar System facts.</div>
+  <button id="again">Explore Again 🔦</button>
+ </div>
+</div>
+
+<div id="hud"><div class="logo">🌠 Solar System Explorer</div><div class="count" id="count">0 / 10 Found</div></div>
+<div id="toast">✨ Fact discovered!</div>
+
+<!-- The facts are intentionally scattered around the same page -->
+<div class="fact" data-i="0" style="left:16%;top:25%"><div class="num">FACT 1</div><div class="words">Our Solar System has eight planets and five officially recognized dwarf planets.</div></div>
+<div class="fact" data-i="1" style="left:45%;top:19%"><div class="num">FACT 2</div><div class="words">Our Solar System has about 1.4 million asteroids and about 4,000 known comets.</div></div>
+<div class="fact" data-i="2" style="left:79%;top:29%"><div class="num">FACT 3</div><div class="words">Our Solar System has hundreds of moons orbiting planets and dwarf planets.</div></div>
+<div class="fact" data-i="3" style="left:27%;top:51%"><div class="num">FACT 4</div><div class="words">Our Solar System is located in one of the Milky Way galaxy’s spiral arms.</div></div>
+<div class="fact" data-i="4" style="left:59%;top:43%"><div class="num">FACT 5</div><div class="words">Our Solar System takes about 230 million years to orbit the centre of the Milky Way.</div></div>
+<div class="fact" data-i="5" style="left:87%;top:52%"><div class="num">FACT 6</div><div class="words">The Milky Way is a barred spiral galaxy.</div></div>
+<div class="fact" data-i="6" style="left:12%;top:72%"><div class="num">FACT 7</div><div class="words">Our Solar System has many worlds with many different types of atmospheres.</div></div>
+<div class="fact" data-i="7" style="left:43%;top:73%"><div class="num">FACT 8</div><div class="words">Four giant planets — Jupiter, Saturn, Uranus and Neptune — have rings.</div></div>
+<div class="fact" data-i="8" style="left:73%;top:77%"><div class="num">FACT 9</div><div class="words">More than 300 robotic spacecraft have left Earth’s orbit, and 24 U.S. astronauts have travelled to the Moon.</div></div>
+<div class="fact" data-i="9" style="left:91%;top:88%"><div class="num">FACT 10</div><div class="words">Earth is the only place where we have found life in our Solar System.</div></div>
+
+<div id="darkness"></div><div id="torch"></div>
+<div id="instructions">🔦 Move the torchlight around the page to find all 10 facts</div>
+</div>
+
+<script>
+const game=document.getElementById("game");
+const facts=[...document.querySelectorAll(".fact")];
+const darkness=document.getElementById("darkness");
+const torch=document.getElementById("torch");
+const count=document.getElementById("count");
+const toast=document.getElementById("toast");
+const intro=document.getElementById("intro");
+const complete=document.getElementById("complete");
+let found=new Set(), started=false;
+
+function setTorch(clientX,clientY){
+ const r=game.getBoundingClientRect();
+ const x=clientX-r.left, y=clientY-r.top;
+ game.style.setProperty("--x",x+"px"); game.style.setProperty("--y",y+"px");
+ if(!started)return;
+ facts.forEach((f,i)=>{
+   if(found.has(i))return;
+   const fr=f.getBoundingClientRect();
+   const cx=fr.left+fr.width/2, cy=fr.top+fr.height/2;
+   const d=Math.hypot(clientX-cx,clientY-cy);
+   if(d<145){
+     found.add(i); f.classList.add("discovered");
+     count.textContent=found.size+" / 10 Found";
+     toast.classList.add("show");
+     setTimeout(()=>toast.classList.remove("show"),700);
+     if(found.size===10)setTimeout(()=>complete.style.display="flex",900);
+   }
+ });
+}
+game.addEventListener("mousemove",e=>setTorch(e.clientX,e.clientY));
+game.addEventListener("touchmove",e=>{const t=e.touches[0];if(t){e.preventDefault();setTorch(t.clientX,t.clientY)}},{passive:false});
+document.getElementById("start").onclick=e=>{e.stopPropagation();started=true;intro.style.display="none";};
+document.getElementById("again").onclick=e=>{e.stopPropagation();found.clear();facts.forEach(f=>f.classList.remove("discovered"));count.textContent="0 / 10 Found";complete.style.display="none";started=true;};
+setTorch(innerWidth/2,innerHeight/2);
+</script>
+</body>
+</html>
